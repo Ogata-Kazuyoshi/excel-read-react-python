@@ -1,6 +1,6 @@
 - pythonの依存関係を入れる方法
 
-1. 仮想環境を作る（よくわかんない）
+1. 仮想環境を作る（brewでpythonが入っていると、グローバルにインストールできないため仮想環境の構築が必要？・・brewでない人はいらないかも）
 ```zh
 python3 -m venv venv
 source venv/bin/activate

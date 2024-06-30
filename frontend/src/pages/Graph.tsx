@@ -9,10 +9,12 @@ interface Props {
     yData: number[]
     title: string
     maxValue?: number
+    xMin?: number
+    xMax?: number
 }
 
 
-export const Graph: React.FC<Props> = ({ xData, yData, title,maxValue }) => {
+export const Graph: React.FC<Props> = ({ xData, yData, title,maxValue,xMin,xMax }) => {
     const data: {
         datasets: { backgroundColor: string; borderColor: string; data: number[]; label: string; fill: boolean }[];
         labels: string[]
@@ -31,8 +33,12 @@ export const Graph: React.FC<Props> = ({ xData, yData, title,maxValue }) => {
 
     const options: ChartOptions<"line"> = {
         scales: {
+            x: {
+                min: xMin,  // 追加: x軸の最小値
+                max: xMax,  // 追加: x軸の最大値
+            },
             y: {
-                beginAtZero: true,
+                // beginAtZero: true,
                 max: maxValue
             }
         },

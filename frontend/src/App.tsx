@@ -3,6 +3,12 @@ import * as XLSX from 'xlsx';
 import {Graph} from "./pages/Graph.tsx";
 import {xDataCreater} from "./functions/xDataCreater.ts";
 import {useEffect, useRef, useState} from "react";
+import axios from "axios";
+
+type ResponseFourier = {
+    fft_result: number[],
+    frequencies:number[]
+}
 
 function App() {
     const xData = xDataCreater()
@@ -14,6 +20,13 @@ function App() {
     const [maxYValue, setMaxYValue] = useState<undefined | number>(undefined)
     const inputRef = useRef<HTMLInputElement | null>(null)
     const [titles, setTitles] = useState<string[]>([])
+    const [isFourier, setIsFourier] = useState(false)
+    const [xDataFourier, setXDataFourier] = useState<number[]>([])
+    const [yDataFourier, setYDataFourier] = useState<number[]>([])
+    const inputXminRef = useRef<HTMLInputElement | null>(null)
+    const inputXmaxRef = useRef<HTMLInputElement | null>(null)
+    const [xMinValue, setXMinValue] = useState<undefined | number>(undefined)
+    const [xMaxValue, setXMaxValue] = useState<undefined | number>(undefined)
     const options = ["a", "b", "c", "d"]
 
 
@@ -92,9 +105,23 @@ function App() {
         element.click();
     }
 
+    const handleConvertWave = async () => {
+        const data = {
+            xData : xData,
+            yData : yData,
+            // xData: [0,1,2,3],
+            // yData:[0,1,2,3]
+        }
+        const res = await axios.post<ResponseFourier>("http://localhost:5181/api/convert",data).then(res => res.data)
+        console.log({res})
+        setXDataFourier(res.frequencies)
+        setYDataFourier(res.fft_result)
+        setIsFourier(true)
+
+    }
+
     return (
         <>
-            {/*<div>エクセルの読み込み</div>*/}
             <input type="file" onChange={handleFile} accept=".xlsx, .xls"/>
             <div>
                 <label>オプション選択:</label>
@@ -116,6 +143,9 @@ function App() {
                 }}>決定
                 </button>
             </div>
+            <div>
+                <button onClick={handleConvertWave}>パイソンでフーリエ変換する</button>
+            </div>
             <Graph xData={xData} yData={yData} title={title} maxValue={maxYValue}/>
             <div>
                 <button onClick={() => {
@@ -128,6 +158,29 @@ function App() {
                 }}>次へ
                 </button>
             </div>
+            {isFourier && <>
+                <Graph xData={xDataFourier} yData={yDataFourier} title={"Fourier変換後"} maxValue={maxYValue} xMin={xMinValue} xMax={xMaxValue}/>
+                <div>
+                    <input type={"number"} ref={inputXminRef}/>
+                    <button onClick={()=>{
+                        if (inputXminRef.current!.value) {
+                            setXMinValue(+inputXminRef.current!.value)
+                        } else {
+                            setXMinValue(undefined)
+                        }
+                    }}>x軸Min</button>
+                </div>
+                <div>
+                    <input type={"number"} ref={inputXmaxRef}/>
+                    <button onClick={()=>{
+                        if (inputXmaxRef.current!.value) {
+                            setXMaxValue(+inputXmaxRef.current!.value)
+                        } else {
+                            setXMaxValue(undefined)
+                        }
+                    }}>x軸Max</button>
+                </div>
+            </>}
         </>
     )
 }
