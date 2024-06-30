@@ -14,7 +14,7 @@ export const FileInput = (props:Props) => {
         const file = event.target.files?.[0];
         if (!file) return;
         props.setFile(file);
-        const res = await handleFileReader(file)
+        const res = await handleFileReader(file,"initialSet")
         props.setTitles(res)
     };
 

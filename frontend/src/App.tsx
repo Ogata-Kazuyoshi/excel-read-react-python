@@ -1,19 +1,20 @@
 import './App.css';
-import * as XLSX from 'xlsx';
 import {Graph} from "./pages/Graph.tsx";
 import {xDataCreater} from "./functions/xDataCreater.ts";
 import {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {FileInput} from "./component/FileInput.tsx";
+import {handleFileReader} from "./functions/handleFileReader.ts";
 
 type ResponseFourier = {
     fft_result: number[],
     frequencies: number[]
 }
 
+export const  maxRow = 3000
+
 function App() {
     const xData = xDataCreater()
-    const maxRow = 3000
     const [selectedColumnIndex, setSelectedColumnIndex] = useState(0)
     const [yData, setYData] = useState<number[]>([])
     const [title, setTitle] = useState("")
@@ -32,28 +33,11 @@ function App() {
 
     useEffect(() => {
         if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const arrayBuffer = e.target.result as ArrayBuffer;
-            const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const sheet = workbook.Sheets['try'];
-            if (sheet) {
-                setTitle(titles[selectedColumnIndex]);
-                const tempYData: number[] = [];
-                for (let i = 1; i < maxRow; i++) {
-                    const cellAddress = XLSX.utils.encode_cell({r: i, c: selectedColumnIndex});
-                    const cell = sheet[cellAddress];
-                    const cellValue = cell ? cell.v : 0;
-                    tempYData.push(cellValue);
-                }
-                setYData(tempYData);
-            } else {
-                window.alert('Sheet "try" not found');
-            }
-        };
-        reader.readAsArrayBuffer(file);
+        setTitle(titles[selectedColumnIndex]);
+        handleFileReader(file, "changeGraph", selectedColumnIndex).then(res => {
+            const convertNum = res.map(elm => +elm)
+            setYData(convertNum)
+        })
     }, [file, selectedColumnIndex]); // 依存配列に file を追加
 
 
