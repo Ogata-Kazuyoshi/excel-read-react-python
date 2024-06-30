@@ -1,0 +1,8 @@
+.graphArea {
+  width: 100%; // 幅を100%に設定
+  height: 80vh; // 高さを80%に設定
+  > canvas {
+    width: 100% !important; // !important を追加して強制適用
+    height: 100% !important; // !important を追加して強制適用
+  }
+}
