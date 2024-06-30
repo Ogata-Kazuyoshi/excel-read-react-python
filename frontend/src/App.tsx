@@ -4,16 +4,17 @@ import {Graph} from "./pages/Graph.tsx";
 import {xDataCreater} from "./functions/xDataCreater.ts";
 import {useEffect, useRef, useState} from "react";
 import axios from "axios";
+import {FileInput} from "./component/FileInput.tsx";
 
 type ResponseFourier = {
     fft_result: number[],
-    frequencies:number[]
+    frequencies: number[]
 }
 
 function App() {
     const xData = xDataCreater()
     const maxRow = 3000
-    const [selectedColumnIndex, setSelectedColumnIndex] = useState(2)
+    const [selectedColumnIndex, setSelectedColumnIndex] = useState(0)
     const [yData, setYData] = useState<number[]>([])
     const [title, setTitle] = useState("")
     const [file, setFile] = useState<File | null>(null);
@@ -27,47 +28,7 @@ function App() {
     const inputXmaxRef = useRef<HTMLInputElement | null>(null)
     const [xMinValue, setXMinValue] = useState<undefined | number>(undefined)
     const [xMaxValue, setXMaxValue] = useState<undefined | number>(undefined)
-    const options = ["a", "b", "c", "d"]
 
-
-    const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newFile = event.target.files?.[0];
-        if (!newFile) return;
-        setFile(newFile); // ファイルを state にセット
-        console.log("aaaa")
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const arrayBuffer = e.target.result as ArrayBuffer;
-            const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets['try'];
-            if (sheet) {
-                let undefinedFlg = false
-                let columnIndex = 0
-                const tempTitles:string[] = []
-                while (!undefinedFlg) {
-                        const cellAddress = XLSX.utils.encode_cell({r: 0, c: columnIndex});
-                        const cell = sheet[cellAddress];
-                        const cellValue = cell ? cell.v : 0;
-                        if (cellValue === 0) {
-                            undefinedFlg = true
-                        } else {
-                            columnIndex++
-                            tempTitles.push(cellValue)
-                        }
-                }
-                setTitles(tempTitles)
-            } else {
-                window.alert('Sheet "try" not found');
-            }
-        };
-        reader.readAsArrayBuffer(newFile);
-    };
-
-    const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedColumnIndex(titles.indexOf(event.target.value));
-    };
 
     useEffect(() => {
         if (!file) return;
@@ -76,7 +37,7 @@ function App() {
         reader.onload = (e) => {
             const arrayBuffer = e.target.result as ArrayBuffer;
             const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, { type: 'array' });
+            const workbook = XLSX.read(data, {type: 'array'});
             const sheet = workbook.Sheets['try'];
             if (sheet) {
                 setTitle(titles[selectedColumnIndex]);
@@ -93,12 +54,12 @@ function App() {
             }
         };
         reader.readAsArrayBuffer(file);
-    }, [file,selectedColumnIndex]); // 依存配列に file を追加
+    }, [file, selectedColumnIndex]); // 依存配列に file を追加
 
 
     const download = (content: string, fileName: string) => {
         const element = document.createElement("a");
-        const file = new Blob([content], { type: 'text/plain' });
+        const file = new Blob([content], {type: 'text/plain'});
         element.href = URL.createObjectURL(file);
         element.download = fileName;
         document.body.appendChild(element); // Required for this to work in FireFox
@@ -107,12 +68,10 @@ function App() {
 
     const handleConvertWave = async () => {
         const data = {
-            xData : xData,
-            yData : yData,
-            // xData: [0,1,2,3],
-            // yData:[0,1,2,3]
+            xData: xData,
+            yData: yData,
         }
-        const res = await axios.post<ResponseFourier>("http://localhost:5181/api/convert",data).then(res => res.data)
+        const res = await axios.post<ResponseFourier>("http://localhost:5181/api/convert", data).then(res => res.data)
         console.log({res})
         setXDataFourier(res.frequencies)
         setYDataFourier(res.fft_result)
@@ -122,15 +81,13 @@ function App() {
 
     return (
         <>
-            <input type="file" onChange={handleFile} accept=".xlsx, .xls"/>
-            <div>
-                <label>オプション選択:</label>
-                <select onChange={handleOptionChange} value={titles[selectedColumnIndex]}>
-                    {titles.map((title, index) => (
-                        <option key={index} value={title}>{title}</option>
-                    ))}
-                </select>
-            </div>
+            <FileInput
+                selectedColumnIndex={selectedColumnIndex}
+                setSelectedColumnIndex={setSelectedColumnIndex}
+                titles={titles}
+                setTitles={setTitles}
+                setFile={setFile}
+            />
             <div>
                 <label>Y軸の最大値変更</label>
                 <input type={"number"} ref={inputRef}/>
@@ -154,31 +111,34 @@ function App() {
                 >前へ
                 </button>
                 <button onClick={() => {
-                    if(selectedColumnIndex < titles.length -1 ) setSelectedColumnIndex(selectedColumnIndex + 1)
+                    if (selectedColumnIndex < titles.length - 1) setSelectedColumnIndex(selectedColumnIndex + 1)
                 }}>次へ
                 </button>
             </div>
             {isFourier && <>
-                <Graph xData={xDataFourier} yData={yDataFourier} title={"Fourier変換後"} maxValue={maxYValue} xMin={xMinValue} xMax={xMaxValue}/>
+                <Graph xData={xDataFourier} yData={yDataFourier} title={"Fourier変換後"} maxValue={maxYValue}
+                       xMin={xMinValue} xMax={xMaxValue}/>
                 <div>
                     <input type={"number"} ref={inputXminRef}/>
-                    <button onClick={()=>{
+                    <button onClick={() => {
                         if (inputXminRef.current!.value) {
                             setXMinValue(+inputXminRef.current!.value)
                         } else {
                             setXMinValue(undefined)
                         }
-                    }}>x軸Min</button>
+                    }}>x軸Min
+                    </button>
                 </div>
                 <div>
                     <input type={"number"} ref={inputXmaxRef}/>
-                    <button onClick={()=>{
+                    <button onClick={() => {
                         if (inputXmaxRef.current!.value) {
                             setXMaxValue(+inputXmaxRef.current!.value)
                         } else {
                             setXMaxValue(undefined)
                         }
-                    }}>x軸Max</button>
+                    }}>x軸Max
+                    </button>
                 </div>
             </>}
         </>
