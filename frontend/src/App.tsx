@@ -1,5 +1,5 @@
 import './App.css';
-import {Graph} from "./pages/Graph.tsx";
+import {Graph} from "./component/Graph.tsx";
 import {xDataCreater} from "./functions/xDataCreater.ts";
 import {useEffect, useState} from "react";
 import {FileInput} from "./component/FileInput.tsx";

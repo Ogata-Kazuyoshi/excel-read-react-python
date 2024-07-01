@@ -1,4 +1,4 @@
-import {Graph} from "../pages/Graph.tsx";
+import {Graph} from "./Graph.tsx";
 import {useRef, useState} from "react";
 
 type Props = {
@@ -15,7 +15,7 @@ export const FourierGraph = (props:Props) => {
     const inputXmaxRef = useRef<HTMLInputElement | null>(null)
 
     return  <>
-        <Graph xData={props.xDataFourier} yData={props.yDataFourier} title={"Fourier変換後"} maxValue={props.maxYValue}
+        <Graph xData={props.xDataFourier} yData={props.yDataFourier} title={"Fourier変換後(フーリエの計算結果がおかしい！！！)"} maxValue={props.maxYValue}
                xMin={xMinValue} xMax={xMaxValue}/>
         <div>
             <input type={"number"} ref={inputXminRef}/>
