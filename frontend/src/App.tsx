@@ -8,6 +8,7 @@ import {ChangeGraphScale} from "./component/ChangeGraphScale.tsx";
 import {FourierConvert} from "./component/FourierConvert.tsx";
 import {PageNation} from "./component/PageNation.tsx";
 import {FourierGraph} from "./component/FourierGraph.tsx";
+import {Magenta} from "./component/Magenta.tsx";
 
 
 export const maxRow = 3000
@@ -31,6 +32,8 @@ function App() {
         setTitle(titles[selectedColumnIndex]);
         handleFileReader(file, "changeGraph", selectedColumnIndex).then(res => {
             const convertNum = res.map(elm => +elm)
+            console.log({convertNum})
+            console.log(JSON.stringify(convertNum))
             setYData(convertNum)
         })
     }, [file, selectedColumnIndex]); // 依存配列に file を追加
@@ -60,6 +63,7 @@ function App() {
                             setYDataFourier={setYDataFourier}
                             setIsFourier={setIsFourier}
             />
+            <Magenta yData={yData}/>
             <Graph xData={xData} yData={yData} title={title} maxValue={maxYValue}/>
             <PageNation selectedColumnIndex={selectedColumnIndex} setSelectedColumnIndex={setSelectedColumnIndex}
                         numberOfTitle={titles.length}/>

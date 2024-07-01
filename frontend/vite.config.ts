@@ -1,13 +1,11 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
+import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  server:{
+  server: {
     port: 5180,
-    // hmr: {
-    //   overlay: false
-    // },
     proxy: {
       '/api': {
         target: 'http://localhost:5181',
@@ -17,4 +15,24 @@ export default defineConfig({
     },
   },
   plugins: [react()],
-})
+  resolve: {
+    alias: {
+      // Buffer モジュールをブラウザ互換のものに置き換え
+      buffer: 'buffer/',
+      // global を window にマッピング
+      global: 'globalthis',
+    },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      // Node.js のグローバル変数とモジュールをポリフィル
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          process: true,
+          buffer: true,
+        }),
+        NodeModulesPolyfillPlugin(),
+      ],
+    },
+  },
+});
