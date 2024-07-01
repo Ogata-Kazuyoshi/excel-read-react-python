@@ -36,8 +36,8 @@ export const handleFileReader = (file:File, mode:mode,selectNumber?:number):Prom
                     break;
                 case "changeGraph":
                         if (sheet) {
-                            const tempYData: string[] = [];
                             if (selectNumber!==undefined){
+                                const tempYData: string[] = [];
                                 for (let i = 1; i < maxRow; i++) {
                                     const cellAddress = XLSX.utils.encode_cell({r: i, c: selectNumber});
                                     const cell = sheet[cellAddress];
